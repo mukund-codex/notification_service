@@ -10,17 +10,19 @@ use Illuminate\Support\Facades\Log;
 class NotificationSender extends Job
 {   
 
-    public $id;
+    public $ids;
+    protected $logger;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($id)
+    public function __construct($ids, Log $logger)
     {
         //
-        $this->id = $id;
+        $this->ids = $ids;
+        $this->logger = $logger;
     }
 
     /**
@@ -31,10 +33,10 @@ class NotificationSender extends Job
     public function handle()
     {
         //
-        Log::info('Job - Request ID: '.$this->id);
+        $this->logger->info('Job - Request ID: '.$this->ids);
         $data = [];
         $uid;
-        $request_record = NotificationRequestModel::find(['id' => $this->id, 'status' => 'success'])->first();
+        $request_record = NotificationRequestModel::find(['id' => $this->ids, 'status' => 'success'])->first();
 
         $data['request_id'] = $request_id = $request_record->request_id;
         $data['uid'] = $uid = $request_record->uid;
@@ -49,7 +51,7 @@ class NotificationSender extends Job
         $file_type = $request_record->file_type;
         $data['callback'] = $callback = $request_record->callback;
         
-        
+        //Notification Logic
 
     }
 }
