@@ -6,6 +6,7 @@ use DB;
 use App\Models\NotificationLogModel;
 use App\Models\NotificationRequestModel;
 use Illuminate\Support\Facades\Log;
+use App\Helpers;
 
 class NotificationSender extends Job
 {   
@@ -50,6 +51,10 @@ class NotificationSender extends Job
         $data['callback'] = $callback = $request_record->callback;
 
         //Notification Logic
+
+        $requestNotification = Notification::send_notification($request_id, $uid, $device_id, $device_type, $title, $description, $image, $pdf_file, $ppt_file, $video_file, $callback);
+
+        \dd($requestNotification);
 
     }
 }
