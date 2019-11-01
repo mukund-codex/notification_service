@@ -11,18 +11,16 @@ class NotificationSender extends Job
 {   
 
     public $ids;
-    protected $logger;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($ids, Log $logger)
+    public function __construct($ids)
     {
         //
         $this->ids = $ids;
-        $this->logger = $logger;
     }
 
     /**
@@ -33,7 +31,7 @@ class NotificationSender extends Job
     public function handle()
     {
         //
-        $this->logger->info('Job - Request ID: '.$this->ids);
+        Log::info('Job - Request ID: '.$this->ids);
         $data = [];
         $uid;
         $request_record = NotificationRequestModel::find(['id' => $this->ids, 'status' => 'success'])->first();
@@ -50,7 +48,7 @@ class NotificationSender extends Job
         $video_file = $request_record->video_file;
         $file_type = $request_record->file_type;
         $data['callback'] = $callback = $request_record->callback;
-        
+
         //Notification Logic
 
     }
