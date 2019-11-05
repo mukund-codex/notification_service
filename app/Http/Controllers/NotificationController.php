@@ -19,61 +19,63 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         //
+        
         $requestData = new NotificationRequestModel();
 
         $requestData->request_id = $request_id = $this->random_num(12);
-        $requestData->uid = $uid = $request->input('uid');
-        $requestData->device_id = $device_id = $request->input('device_id');
-        $requestData->device_type = $device_type = $request->input('device_type');
-        $requestData->title = $title = $request->input('title');
-        $requestData->description = $description = $request->input('description');
-        $requestData->image = $image = $request->input('image');
-        $requestData->pdf_file = $pdf_file = $request->input('pdf_file');
-        $requestData->ppt_file = $ppt_file = $request->input('ppt_file');
-        $requestData->video_file = $video_file = $request->input('video_file');
-        $requestData->file_type = $file_type = $request->input('file_type');
-        $requestData->callback = $callback = $request->input('callback');
+        $requests = $request->input('request');
+        $requestData->request = json_encode($request->input('request'));
 
-        if(empty($device_id)){
-            $requestData->status = 'fail';
-            $requestData->error = 'Empty Mobile Number';
+        // \dd($requests['device_info']);
+        if(empty($requests)){
+            $requestData->response = json_encode([
+                "status" => 'fail',
+                "error" => 'Empty Request Data'
+            ]);
 
             $requestData->save();
 
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Device ID', 'data' => ['request_id' => $request_id, 'uid' => $uid] ]);
+            return response()->json(['status' => 'Fail', 'message' => 'Empty Request Data', 'data' => ['request_id' => $request_id]]);
         }
 
-        if(empty($device_type)){
-            $requestData->status = 'fail';
-            $requestData->error = 'Empty Device Type';
+        if(!array_key_exists('title', $requests)){
+            $requestData->response = json_encode([
+                "status" => 'fail',
+                "error" => 'Empty Title'
+            ]);
 
             $requestData->save();
 
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Device Type', 'data' => ['request_id' => $request_id, 'uid' => $uid] ]);
+            return response()->json(['status' => 'Fail', 'message' => 'Empty Title', 'data' => ['request_id' => $request_id]]);
         }
 
-        if(empty($title)){
-            $requestData->status = 'fail';
-            $requestData->error = 'Empty Title';
+        if(!array_key_exists('server_key', $requests)){
+            $requestData->response = json_encode([
+                "status" => 'fail',
+                "error" => 'Empty Server Key'
+            ]);
 
             $requestData->save();
 
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Title', 'data' => ['request_id' => $request_id, 'uid' => $uid] ]);
+            return response()->json(['status' => 'Fail', 'message' => 'Empty Server Key', 'data' => ['request_id' => $request_id]]);
         }
 
-        if(empty($callback)){
-            $requestData->status = 'fail';
-            $requestData->error = 'Empty Callback URL';
-
+        if(!array_key_exists('uid', $requests)){
+            $requestData->response = json_encode([
+                "status" => 'fail',
+                "error" => 'Empty Unique ID(uid)'
+            ]);           
             $requestData->save();
 
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Callback URL', 'data' => ['request_id' => $request_id, 'uid' => $uid] ]);
+            return response()->json(['status' => 'Fail', 'message' => 'Empty Unique ID(uid)', 'data' => ['request_id' => $request_id]]);
         }
 
-        $requestData->status = 'success';
-
+        $requestData->response = json_encode([
+            "status" => 'success'
+        ]);
+        
         $requestData->save();
-
+        //\dd($requestData->id);
         event(new NotificationEvent($requestData->id));
 
     }

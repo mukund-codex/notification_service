@@ -17,19 +17,8 @@ class NotificationRequest extends Migration
         Schema::create('notification_request', function(Blueprint $table){
             $table->integer('id')->autoIncrement();
             $table->string('request_ id');
-            $table->string('uid');
-            $table->string('device_id');
-            $table->string('device_type');
-            $table->string('title');
-            $table->string('description');
-            $table->string('image');
-            $table->string('pdf_file');
-            $table->string('ppt_file');
-            $table->string('video_file');
-            $table->string('file_type');
-            $table->string('download_status');
-            $table->string('request_status');
-            $table->string('callback');
+            $table->json('request');
+            $table->json('response');
             $table->timestamps();
         });
 

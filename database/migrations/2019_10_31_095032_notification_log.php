@@ -16,13 +16,8 @@ class NotificationLog extends Migration
         //
         Schema::create('notification_log', function(Blueprint $table){
             $table->integer('notification_id')->autoIncrement();
-            $table->string('request_ id');
-            $table->string('uid');
-            $table->string('device_id');
-            $table->string('device_type');
-            $table->string('title');
-            $table->string('callback');
-            $table->string('status');
+            $table->string('request_id');
+            $table->json('response');
             $table->timestamps();
         });
     }

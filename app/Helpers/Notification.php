@@ -4,84 +4,96 @@ namespace App\Helpers;
 
 use DB;
 use App\Models\NotificationLogModel;
+use App\Helpers\Curl;
 
 class Notification{
 
-    function send_notification($request_id, $uid, $registration_ids, $device_type, $title, $desc, $image, $pdf_file, $ppt_file, $video_file, $callback){
-        $url = 'https://fcm.googleapis.com/fcm/send';
-  
+    /**
+   * Gets Result Array with Key (Register Ids) <=> Value (Notification Result) Pair
+   * @param register_ids[] Registration Ids  List Of Registration Ids
+   * @param notification_result Result Json registration result
+   * 
+   * @return registration_result[] Registration with result
+   */
+    public static function get_notification_status($register_ids,$notification_json_result){
+        $notification_result = json_decode($notification_json_result,TRUE);
+        if(count($notification_result) < 0 || !is_array($notification_result)){ return; }
+        $keys1  = [];
+        foreach ($notification_result["results"] as $key => $value) {
+            if(array_key_exists("error", $value) || array_key_exists("message_id",$value)){
+                foreach ($value as $k1 => $v1) {
+                    array_push($keys1,$v1);
+                }
+            }
+        }   
+        return array_combine($register_ids,$keys1);
+    }
+
+    public static function send_notification($request_id, $request_data){      
+        
+        $request_data = json_decode($request_data);
+        
+        $server_key = $request_data->server_key;
+        $title = $request_data->title;
+        $desc = $request_data->description;
+        $image = $request_data->image;
+        $pdf_file = $request_data->pdf_file;
+        $ppt_file = $request_data->ppt_file;
+        $video_file = $request_data->video_file;
+        $device_info = $request_data->device_info;
+        $android_ids = [];
+        $ios_ids = [];
+        
+        //\dd("Devices", $device_info);
+
         $fields = [];
-        if($device_type) {
-  
-            $notification_data = array(
+
+        $device_ids = array_column($request_data->device_info, 'device_id');
+
+        foreach($device_info as $device){
+            if(strtolower($device->device_type) == 'android'){
+                array_push($android_ids, $device->device_id);                
+            }
+            if(strtolower($device->device_type) == 'ios'){
+                array_push($ios_ids, $device->device_id);                
+            }
+        }
+
+        $register_ids = array_merge($android_ids, $ios_ids);
+
+        //$notification_data = $request_data;
+        
+        $notification_data = array(
             'title'           => $title,  
             "body"            => $desc, 
-            'image'            => $image,
+            'image'           => $image,
             'pdf_file'        => $pdf_file,
             'ppt_file'        => $ppt_file,
             'video_file'      => $video_file,
-            'date'            => $date,
             );
-    
-            switch (strtolower($device_type)) {
-            case 'android':          
-                $fields['registration_ids'] = (array)$registration_ids;
-                // $fields['notification'] = $notification_data;
-                $fields['data'] = $notification_data;
-                $fields['priority'] = 'high';
-                break;
-    
-            case 'ios':
-                $fields['registration_ids'] = (array)$registration_ids;
-                $fields['notification'] = $notification_data;
-                $fields['mutable_content'] = TRUE;
-                $fields['content_available'] = TRUE;
-                break;
-            
-            default:
-                return response()->json(['status' => 'Fail', 'message' => 'Empty Device Type', 'data' => ['request_id' => $request_id, 'uid' => $uid] ]);
-                break;
-            }
-        }
-  
-        //  echo "<pre>";
-        //  print_r($fields);exit;
-            
-        $headers = array('Authorization: key='.API_ACCESS_KEY,'Content-Type: application/json');
-    
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        $result = curl_exec($ch);
-        curl_close($ch);
         
-        $log = 'message: ' . json_encode($fields) . ' :: response: ' . $result . PHP_EOL;
-    
-        if ($result === FALSE) {
-            return;
-        }else{
-    
-            //save data in notification log
+        $fields['registration_ids'] = (array)$register_ids;
+        $fields['data'] = $notification_data;
+        //$fields['priority'] = 'high';
+        //$fields['notification'] = $notification_data;
+        $fields['mutable_content'] = TRUE;
+        $fields['content_available'] = TRUE;    
+        
+        $url = 'https://fcm.googleapis.com/fcm/send';
+        $headers = array('Authorization: key='.$server_key,'Content-Type: application/json');
 
-            $logData = new NotificationLogModel();
+        $result = Curl::curl_request($headers, $url, $fields);
 
-            $logData->request_id = $request_id;
-            $logData->uid = $uid;
-            $logData->device_id = $registration_ids;
-            $logData->device_type = $device_type;
-            $logData->title = $title;
-            $logData->callback = $callback;
+        $registration_log_ids = Notification::get_notification_status((array)$device_ids,$result);
+                
+        $logData = new NotificationLogModel();
 
-            $logData->save();
+        $logData->request_id = $request_id;
+        $logData->response = json_encode($registration_log_ids);
+        $logData->save();
 
-            return response()->json(['status' => 'Success', 'message' => '', 'data' => ['request_id' => $request_id, 'uid' => $uid] ]);
+        return $registration_log_ids; //response()->json(['status' => 'Success', 'message' => '', 'data' => $registration_log_ids ]);
 
-        }
     }
 
 }
