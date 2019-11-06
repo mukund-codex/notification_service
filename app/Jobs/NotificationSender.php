@@ -20,7 +20,7 @@ class NotificationSender extends Job
      */
     public function __construct($ids)
     {
-        //
+        //        
         $this->ids = $ids;
     }
 

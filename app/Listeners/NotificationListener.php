@@ -30,7 +30,7 @@ class NotificationListener
         $id = $event->id;
         if(!empty($id)){
             \dispatch(new NotificationSender($id));
-            Log::info('Listener - Request ID: '.$id);
+            //Log::info('Listener - Request ID: '.$id);
         }
     }
 }

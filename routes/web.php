@@ -16,7 +16,6 @@ $router->get('/', function () use ($router) {
 });
 
 //Notification Routes
-$router->post('notification', [
-    'as' => 'notification',
+$router->post('send_notification', [
     'uses' => 'NotificationController@index'
 ]);

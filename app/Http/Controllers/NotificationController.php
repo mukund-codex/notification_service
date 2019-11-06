@@ -26,7 +26,7 @@ class NotificationController extends Controller
         $requests = $request->input('request');
         $requestData->request = json_encode($request->input('request'));
 
-        // \dd($requests['device_info']);
+        //\dd($requests['device_info']);
         if(empty($requests)){
             $requestData->response = json_encode([
                 "status" => 'fail',

@@ -78,6 +78,9 @@ $app->routeMiddleware([
 |
 */
 
+$app->configure('database');
+$app->configure('queue');
+
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);

@@ -3,8 +3,8 @@
 namespace App\Events;
 
 use App\Models\NotificationRequestModel;
-use Illuminate\Support\Facades\Log;
-
+//use Illuminate\Support\Facades\Log;
+use Log;
 class NotificationEvent extends Event
 {   
 
@@ -19,6 +19,7 @@ class NotificationEvent extends Event
     {
         //
         $this->id = $id;
-        Log::info('Event - Request ID: '.$this->id);
+       // Log::info('Event - Request ID: '.$this->id);
+        //\dd($id);
     }
 }
