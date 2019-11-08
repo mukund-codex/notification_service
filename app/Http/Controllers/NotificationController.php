@@ -19,65 +19,40 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         //
-        
+        //\dd($request->all());
         $requestData = new NotificationRequestModel();
 
         $requestData->request_id = $request_id = $this->random_num(12);
-        $requests = $request->input('request');
-        $requestData->request = json_encode($request->input('request'));
+        $requests = $request;//$request->input('request');
+        $requestData->request = json_encode($requests);
 
         //\dd($requests['device_info']);
-        if(empty($requests)){
-            $requestData->response = json_encode([
-                "status" => 'fail',
-                "error" => 'Empty Request Data'
-            ]);
-
-            $requestData->save();
-
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Request Data', 'data' => ['request_id' => $request_id]]);
-        }
-
-        if(!array_key_exists('title', $requests)){
-            $requestData->response = json_encode([
-                "status" => 'fail',
-                "error" => 'Empty Title'
-            ]);
-
-            $requestData->save();
-
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Title', 'data' => ['request_id' => $request_id]]);
-        }
-
-        if(!array_key_exists('server_key', $requests)){
-            $requestData->response = json_encode([
-                "status" => 'fail',
-                "error" => 'Empty Server Key'
-            ]);
-
-            $requestData->save();
-
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Server Key', 'data' => ['request_id' => $request_id]]);
-        }
-
-        if(!array_key_exists('uid', $requests)){
-            $requestData->response = json_encode([
-                "status" => 'fail',
-                "error" => 'Empty Unique ID(uid)'
-            ]);           
-            $requestData->save();
-
-            return response()->json(['status' => 'Fail', 'message' => 'Empty Unique ID(uid)', 'data' => ['request_id' => $request_id]]);
-        }
-
-        $requestData->response = json_encode([
-            "status" => 'success'
-        ]);
+        $validation = $this->validation($requests, $request_id);
         
+        $requestData->response = json_encode($validation);
+
         $requestData->save();
         //\dd($requestData->id);
         event(new NotificationEvent($requestData->id));
 
+    }
+
+    public function validation($request, $request_id){
+        //\dd($request->all());
+        $validator = Validator::make($request->all(), [
+            'request.title' => 'required',
+            'request.server_key' => 'required',
+            'request.uid' => 'required',
+            'request.callback' => 'required',
+            'request.device_info.device_id' => 'required',
+            'request.device_info.device_type' => 'required',
+        ]);
+
+        $errors = $validator->errors()->messages();
+        
+        $status = empty($errors) ? 'Success' : 'Fail';
+
+        return response()->json(['status' => $status, 'message' => $errors, 'data' => ['request_id' => $request_id]]);
     }
 
     public function random_num($size) {

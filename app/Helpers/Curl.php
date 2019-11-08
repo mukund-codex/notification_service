@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class Curl {
 
-    public static function curl_request($headers, $url, $fields){              
+    public static function request($headers, $url, $fields){              
     
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);

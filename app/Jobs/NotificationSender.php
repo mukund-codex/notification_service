@@ -7,6 +7,7 @@ use App\Models\NotificationLogModel;
 use App\Models\NotificationRequestModel;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Notification;
+use App\Helpers\Common;
 
 class NotificationSender extends Job
 {   
@@ -38,13 +39,18 @@ class NotificationSender extends Job
         $request_record = NotificationRequestModel::find(['id' => $this->ids])->first();
         
         //Notification Logic
-
         $request_id = $request_record->request_id;  
         $request_data = $request_record->request;
+        $requestData = json_decode($request_record->request, TRUE);
+        $callback = $requestData["callback"];
         
         $requestNotification = Notification::send_notification($request_id, $request_data);
 
-        \dd($requestNotification);
+        $sendResponse = Common::curl_request($callback, $requestNotification);
+
+        \dd($sendResponse);
+
+        Log::info('Callback Response : '.$sendResponse);
 
     }
 }

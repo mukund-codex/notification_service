@@ -74,15 +74,14 @@ class Notification{
         
         $fields['registration_ids'] = (array)$register_ids;
         $fields['data'] = $notification_data;
-        //$fields['priority'] = 'high';
-        //$fields['notification'] = $notification_data;
+        $fields['priority'] = 'high';
         $fields['mutable_content'] = TRUE;
         $fields['content_available'] = TRUE;    
         
         $url = 'https://fcm.googleapis.com/fcm/send';
         $headers = array('Authorization: key='.$server_key,'Content-Type: application/json');
 
-        $result = Curl::curl_request($headers, $url, $fields);
+        $result = Curl::request($headers, $url, $fields);
 
         $registration_log_ids = Notification::get_notification_status((array)$device_ids,$result);
                 
