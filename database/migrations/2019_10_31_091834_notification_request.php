@@ -17,8 +17,8 @@ class NotificationRequest extends Migration
         Schema::create('notification_request', function(Blueprint $table){
             $table->integer('id')->autoIncrement();
             $table->string('request_ id');
-            $table->json('request');
-            $table->json('response');
+            $table->jsonb('request');
+            $table->jsonb('response');
             $table->timestamps();
         });
 

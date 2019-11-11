@@ -19,21 +19,22 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         //
-        //\dd($request->all());
         $requestData = new NotificationRequestModel();
 
         $requestData->request_id = $request_id = $this->random_num(12);
+        
         $requests = $request;//$request->input('request');
         $requestData->request = json_encode($requests);
-
-        //\dd($requests['device_info']);
-        $validation = $this->validation($requests, $request_id);
+        
+        $validation = $this->validation($requests, $request_id);        
         
         $requestData->response = json_encode($validation);
-
-        $requestData->save();
-        //\dd($requestData->id);
-        event(new NotificationEvent($requestData->id));
+        
+        return response()->json(['status' => '', 'message' => $validation, 'data' => ['request_id' => $request_id]]);
+        
+        if($requestData->save()):
+            event(new NotificationEvent($requestData->id));
+        endif;
 
     }
 

@@ -17,7 +17,7 @@ class NotificationLog extends Migration
         Schema::create('notification_log', function(Blueprint $table){
             $table->integer('notification_id')->autoIncrement();
             $table->string('request_id');
-            $table->json('response');
+            $table->jsonb('response');
             $table->timestamps();
         });
     }
