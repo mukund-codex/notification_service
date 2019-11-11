@@ -19,6 +19,5 @@ class NotificationEvent extends Event
         //
         $this->id = $id;
         Log::info('Event - Request ID: '.$this->id);
-        //\dd($id);
     }
 }

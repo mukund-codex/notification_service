@@ -20,17 +20,18 @@ class NotificationController extends Controller
     {
         //
         $requestData = new NotificationRequestModel();
-
-        $requestData->request_id = $request_id = $this->random_num(12);
         
-        $requests = $request;//$request->input('request');
+        $requestData->request_id = $request_id = $this->random_num(12);
+
+        $validation = $this->validation($request, $request_id);        
+        
+        $requests = $request->input('request');
         $requestData->request = json_encode($requests);
         
-        $validation = $this->validation($requests, $request_id);        
         
         $requestData->response = json_encode($validation);
         
-        return response()->json(['status' => '', 'message' => $validation, 'data' => ['request_id' => $request_id]]);
+        //return response()->json(['status' => '', 'message' => $validation, 'data' => ['request_id' => $request_id]]);
         
         if($requestData->save()):
             event(new NotificationEvent($requestData->id));
@@ -44,9 +45,7 @@ class NotificationController extends Controller
             'request.title' => 'required',
             'request.server_key' => 'required',
             'request.uid' => 'required',
-            'request.callback' => 'required',
-            'request.device_info.device_id' => 'required',
-            'request.device_info.device_type' => 'required',
+            'request.callback' => 'required'
         ]);
 
         $errors = $validator->errors()->messages();
